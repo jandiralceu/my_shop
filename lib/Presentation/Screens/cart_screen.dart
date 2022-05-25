@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:my_shop/Domain/Models/cart_item.dart';
-import 'package:my_shop/Presentation/Widgets/cart_details_item.dart';
 import 'package:provider/provider.dart';
 
 import '../../Providers/cart.dart';
+import '../../Presentation/Widgets/cart_details_item.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({Key? key}) : super(key: key);
@@ -12,60 +11,64 @@ class CartScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cart = Provider.of<Cart>(context);
+    final cart = Provider.of<Cart>(context, listen: false);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Cart'),
       ),
-      body: Column(children: [
-        Card(
-          margin: const EdgeInsets.all(15.0),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Total',
-                  style: TextStyle(fontSize: 20),
-                ),
-                const Spacer(),
-                Chip(
-                  label: Text(
-                    '\$${cart.totalAmount}',
-                    style: TextStyle(
-                        color: Theme.of(context)
-                            .primaryTextTheme
-                            .headline6
-                            ?.color),
+      body: Column(
+        children: [
+          Card(
+            margin: const EdgeInsets.all(15.0),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Total',
+                    style: TextStyle(fontSize: 20),
                   ),
-                  backgroundColor: Theme.of(context).primaryColor,
-                ),
-                TextButton(
-                  onPressed: () {},
-                  child: Text(
-                    'ORDER NOW',
-                    style: TextStyle(color: Theme.of(context).primaryColor),
+                  const Spacer(),
+                  Chip(
+                    label: Text(
+                      '\$${cart.totalAmount}',
+                      style: TextStyle(
+                          color: Theme.of(context)
+                              .primaryTextTheme
+                              .headline6
+                              ?.color),
+                    ),
+                    backgroundColor: Theme.of(context).primaryColor,
                   ),
-                )
-              ],
+                  TextButton(
+                    onPressed: () {},
+                    child: Text(
+                      'ORDER NOW',
+                      style: TextStyle(color: Theme.of(context).primaryColor),
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
-        ),
-        const SizedBox(
-          height: 10.0,
-        ),
-        Expanded(
+          const SizedBox(
+            height: 10.0,
+          ),
+          Expanded(
             child: ListView.builder(
-          itemCount: cart.items.length,
-          itemBuilder: (ctx, index) => CartDetailsItem(
-              id: cart.items.values.toList()[index].id,
-              title: cart.items.values.toList()[index].title,
-              quantity: cart.items.values.toList()[index].quantity,
-              price: cart.items.values.toList()[index].price),
-        ))
-      ]),
+              itemCount: cart.items.length,
+              itemBuilder: (ctx, index) => CartDetailsItem(
+                  id: cart.items.values.toList()[index].id,
+                  productId: cart.items.keys.toList()[index],
+                  title: cart.items.values.toList()[index].title,
+                  quantity: cart.items.values.toList()[index].quantity,
+                  price: cart.items.values.toList()[index].price),
+            ),
+          )
+        ],
+      ),
     );
   }
 }
