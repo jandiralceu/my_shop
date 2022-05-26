@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:my_shop/Providers/orders.dart';
 import 'package:provider/provider.dart';
 
 import '../../Providers/cart.dart';
+import '../../Providers/orders.dart';
 import '../../Presentation/Widgets/cart_details_item.dart';
 
 class CartScreen extends StatelessWidget {
@@ -12,8 +12,8 @@ class CartScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cart = Provider.of<Cart>(context, listen: false);
-    final orders = Provider.of<Orders>(context, listen: false);
+    final cart = Provider.of<Cart>(context);
+    final orders = Provider.of<Orders>(context);
 
     return Scaffold(
       appBar: AppBar(

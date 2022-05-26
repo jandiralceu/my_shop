@@ -30,11 +30,34 @@ class CartDetailsItem extends StatelessWidget {
         color: Theme.of(context).errorColor,
         padding: const EdgeInsets.only(right: 20.0),
         margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-        child: const Icon(Icons.delete, color: Colors.white, size: 40,),
+        child: const Icon(
+          Icons.delete,
+          color: Colors.white,
+          size: 40,
+        ),
       ),
       direction: DismissDirection.endToStart,
-      onDismissed: (_) {
-        cart.removeItem(productId);
+      onDismissed: (_) => cart.removeItem(productId),
+      confirmDismiss: (direction) {
+        return showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Remove item'),
+            content: const Text('Do you want to remove '
+                'the item '
+                'from the cart?'),
+            actions: [
+              TextButton(
+                child: const Text('No'),
+                onPressed: () => Navigator.of(context).pop(false),
+              ),
+              TextButton(
+                child: const Text('Yes'),
+                onPressed: () => Navigator.of(context).pop(true),
+              ),
+            ],
+          ),
+        );
       },
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
