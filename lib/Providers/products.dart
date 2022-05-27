@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import '../Domain/Models/product.dart';
 
 class Products with ChangeNotifier {
-  final List<Product> _items = [];
+  List<Product> _items = [];
   static final baseUrl = Uri.parse('https://jandir-my-shop-default-rtdb'
       '.firebaseio.com/products.json');
 
@@ -62,10 +62,12 @@ class Products with ChangeNotifier {
   Future<void> getAllProducts() async {
     try {
       final result = await http.get(baseUrl);
-      final products = json.decode(result.body) as Map<String, dynamic>;
+      final extractedProducts = json.decode(result.body) as Map<String,
+          dynamic>;
+      final List<Product> products = [];
 
-      products.forEach((id, product) {
-        _items.add(
+      extractedProducts.forEach((id, product) {
+        products.add(
           Product(
             id: id,
             price: product['price'],
@@ -76,6 +78,8 @@ class Products with ChangeNotifier {
           ),
         );
       });
+
+      _items = products;
 
       notifyListeners();
     } catch (error) {

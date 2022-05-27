@@ -11,6 +11,10 @@ class UserProductsScreen extends StatelessWidget {
 
   static const routeName = '/user-products';
 
+  Future<void> _refreshProducts(BuildContext context) async {
+    await Provider.of<Products>(context, listen: false).getAllProducts();
+  }
+
   @override
   Widget build(BuildContext context) {
     final productsData = Provider.of<Products>(context);
@@ -19,25 +23,29 @@ class UserProductsScreen extends StatelessWidget {
         title: const Text('My Products'),
         actions: [
           IconButton(
-            onPressed: () => Navigator.of(context).pushNamed(EditProductScreen.routeName),
+            onPressed: () =>
+                Navigator.of(context).pushNamed(EditProductScreen.routeName),
             icon: const Icon(Icons.add),
           )
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: ListView.builder(
-          itemCount: productsData.items.length,
-          itemBuilder: (ctx, index) => Column(
-            children: [
-              UserProductItemDetails(
-                id: productsData.items[index].id,
-                key: Key(productsData.items[index].id),
-                title: productsData.items[index].title,
-                imageUrl: productsData.items[index].imageUrl,
-              ),
-              const Divider(),
-            ],
+      body: RefreshIndicator(
+        onRefresh: () => _refreshProducts(context),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: ListView.builder(
+            itemCount: productsData.items.length,
+            itemBuilder: (ctx, index) => Column(
+              children: [
+                UserProductItemDetails(
+                  id: productsData.items[index].id,
+                  key: Key(productsData.items[index].id),
+                  title: productsData.items[index].title,
+                  imageUrl: productsData.items[index].imageUrl,
+                ),
+                const Divider(),
+              ],
+            ),
           ),
         ),
       ),
