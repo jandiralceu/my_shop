@@ -15,41 +15,32 @@ class OrdersScreen extends StatefulWidget {
 }
 
 class _OrdersScreenState extends State<OrdersScreen> {
-  var _loading = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    Future.delayed(Duration.zero).then((_) async {
-      setState(() {
-        _loading = true;
-      });
-      await Provider.of<Orders>(context, listen: false).getOrders();
-      setState(() {
-        _loading = false;
-      });
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    final ordersData = Provider.of<Orders>(context, listen: false);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Order resume'),
       ),
       drawer: const AppDrawer(),
-      body: _loading
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : ListView.builder(
-              itemCount: ordersData.orders.length,
-              itemBuilder: (ctx, index) =>
-                  OrderItemDetails(ordersData.orders[index]),
-            ),
+      body: FutureBuilder(
+        future: Provider.of<Orders>(context, listen: false).getOrders(),
+        builder: (_, dataSnapshot) {
+          if (dataSnapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else {
+            if (dataSnapshot.error != null) {
+              return const Center(child: CircularProgressIndicator());
+            } else {
+              return Consumer<Orders>(
+                  builder: (ctx, ordersData, child) => ListView.builder(
+                        itemCount: ordersData.orders.length,
+                        itemBuilder: (ctx, index) =>
+                            OrderItemDetails(ordersData.orders[index]),
+                      ));
+            }
+          }
+        },
+      ),
     );
   }
 }
