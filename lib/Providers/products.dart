@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:my_shop/Helpers/url.dart';
 
 import '../Domain/Models/product.dart';
 import '../Domain/Models/http_exception.dart';
@@ -17,16 +18,10 @@ class Products with ChangeNotifier {
     return _items.where((product) => product.isFavorite).toList();
   }
 
-  Uri getUrl({String? id}) {
-    return Uri.parse(id == null ? 'https://jandir-my-shop-default-rtdb.firebaseio'
-        '.com/products.json' : 'https://jandir-my-shop-default-rtdb'
-        '.firebaseio.com/products/$id.json');
-  }
-
   Future<void> addProduct(Product product) async {
     try {
       await http.post(
-        getUrl(),
+        UrlHelper.getProductUrl(),
         body: json.encode(
           {
             'title': product.title,
@@ -52,7 +47,7 @@ class Products with ChangeNotifier {
 
   Future<void> updateProduct(String id, Product newProduct) async {
     try {
-      await http.patch(getUrl(id: id), body: json.encode({
+      await http.patch(UrlHelper.getProductUrl(id: id), body: json.encode({
         'title': newProduct.title,
         'description': newProduct.description,
         'price': newProduct.price,
@@ -73,7 +68,7 @@ class Products with ChangeNotifier {
 
   Future<void> deleteProduct(String id) async {
     try {
-      final result = await http.delete(getUrl(id: id));
+      final result = await http.delete(UrlHelper.getProductUrl(id: id));
 
       if (result.statusCode >= 400) {
         throw HttpException('Could not delete product.');
@@ -88,25 +83,30 @@ class Products with ChangeNotifier {
 
   Future<void> getAllProducts() async {
     try {
-      final result = await http.get(getUrl());
-      final extractedProducts = json.decode(result.body) as Map<String,
-          dynamic>;
-      final List<Product> products = [];
+      final result = await http.get(UrlHelper.getProductUrl());
+      final extractedProducts = json.decode(result.body);
 
-      extractedProducts.forEach((id, product) {
-        products.add(
-          Product(
-            id: id,
-            price: product['price'],
-            title: product['title'],
-            imageUrl: product['imageUrl'],
-            isFavorite: product['isFavorite'],
-            description: product['description'],
-          ),
-        );
-      });
+      if (extractedProducts == null) {
+        _items = [];
+      } else {
+        final List<Product> products = [];
 
-      _items = products;
+        extractedProducts.forEach((id, product) {
+          products.add(
+            Product(
+              id: id,
+              price: product['price'],
+              title: product['title'],
+              imageUrl: product['imageUrl'],
+              isFavorite: product['isFavorite'],
+              description: product['description'],
+            ),
+          );
+        });
+
+        _items = products;
+      }
+
 
       notifyListeners();
     } catch (error) {

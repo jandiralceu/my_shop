@@ -16,19 +16,24 @@ class ProductsList extends StatelessWidget {
         ? productsData.favoritesProducts
         : productsData.items;
 
-    return GridView.builder(
-      padding: const EdgeInsets.all(10.0),
-      itemCount: products.length,
-      itemBuilder: (ctx, index) => ChangeNotifierProvider.value(
-        value: products[index],
-        child: const ProductItem(),
-      ),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 3 / 2,
-        crossAxisSpacing: 10.0,
-        mainAxisSpacing: 10.0,
-      ),
-    );
+    return products.isEmpty
+        ? const Center(
+            child: Text('No Product '
+                'available'),
+          )
+        : GridView.builder(
+            padding: const EdgeInsets.all(10.0),
+            itemCount: products.length,
+            itemBuilder: (ctx, index) => ChangeNotifierProvider.value(
+              value: products[index],
+              child: const ProductItem(),
+            ),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 3 / 2,
+              crossAxisSpacing: 10.0,
+              mainAxisSpacing: 10.0,
+            ),
+          );
   }
 }

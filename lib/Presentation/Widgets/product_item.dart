@@ -12,6 +12,7 @@ class ProductItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final cart = Provider.of<Cart>(context, listen: false);
     final product = Provider.of<Product>(context, listen: false);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(10.0),
@@ -33,7 +34,18 @@ class ProductItem extends StatelessWidget {
           ),
           leading: Consumer<Product>(
             builder: (ctx, product, _) => IconButton(
-              onPressed: () => product.toggleFavoriteStatus(),
+              onPressed: () async {
+                try {
+                  await product.toggleFavoriteStatus();
+                } catch(error) {
+                  scaffoldMessenger.hideCurrentSnackBar();
+                  scaffoldMessenger.showSnackBar(
+                    const SnackBar(
+                      content: Text('Favorite failed.'),
+                    ),
+                  );
+                }
+              },
               icon: Icon(
                 product.isFavorite ? Icons.favorite : Icons.favorite_border,
               ),
