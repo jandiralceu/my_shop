@@ -78,7 +78,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
     super.didChangeDependencies();
   }
 
-  Future<void> _saveForm () async {
+  Future<void> _saveForm() async {
     final isValid = _form.currentState!.validate();
 
     if (isValid) {
@@ -91,8 +91,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
         });
 
         try {
-          await Provider.of<Products>(context, listen: false)
-              .addProduct(
+          await Provider.of<Products>(context, listen: false).addProduct(
             Product(
               id: DateTime.now().toString(),
               isFavorite: false,
@@ -102,7 +101,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
               imageUrl: initialValues['imageUrl'] as String,
             ),
           );
-        } catch(error) {
+        } catch (error) {
           await showDialog<Null>(
             context: context,
             builder: (ctx) => AlertDialog(
@@ -115,30 +114,41 @@ class _EditProductScreenState extends State<EditProductScreen> {
               ],
             ),
           );
-        } finally {
-          setState(() {
-            _isLoading = false;
-          });
-          Navigator.of(context).pop();
         }
       } else {
-        Provider.of<Products>(context, listen: false).updateProduct(
-          productId as String,
-          Product(
-            id: productId,
-            isFavorite: _editedProduct.isFavorite,
-            title: initialValues['title'] as String,
-            description: initialValues['description'] as String,
-            price: double.parse(initialValues['price'] as String),
-            imageUrl: initialValues['imageUrl'] ?? _imageUrlController.text,
-          ),
-        );
-        setState(() {
-          _isLoading = false;
-        });
-        Navigator.of(context).pop();
+        try {
+          await Provider.of<Products>(context, listen: false).updateProduct(
+            productId as String,
+            Product(
+              id: productId,
+              isFavorite: _editedProduct.isFavorite,
+              title: initialValues['title'] as String,
+              description: initialValues['description'] as String,
+              price: double.parse(initialValues['price'] as String),
+              imageUrl: initialValues['imageUrl'] ?? _imageUrlController.text,
+            ),
+          );
+        } catch (error) {
+          await showDialog<Null>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text('An error occurred'),
+              content: Text(error.toString()),
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    child: const Text('Ok'))
+              ],
+            ),
+          );
+        }
       }
     }
+
+    setState(() {
+      _isLoading = false;
+    });
+    Navigator.of(context).pop();
   }
 
   @override
