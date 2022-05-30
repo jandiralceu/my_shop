@@ -1,12 +1,18 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class UrlHelper {
-  static Uri getProductUrl({ String? id, String? token }) {
+  static Uri getProductUrl({ String? id, String? token, String? userId }) {
     return Uri.parse(id == null
         ? 'https://jandir-my-shop-default-rtdb.firebaseio'
             '.com/products.json?auth=$token'
         : 'https://jandir-my-shop-default-rtdb'
             '.firebaseio.com/products/$id.json?auth=$token');
+  }
+
+  static Uri getUserFavoritesProductUrl({ String? id, String? token, String?
+  userId }) {
+    return Uri.parse('https://jandir-my-shop-default-rtdb.firebaseio'
+        '.com/userFavorites/$userId/$id.json?auth=$token');
   }
 
   static Uri getOrderUrl({String? id, String? token}) {

@@ -22,15 +22,13 @@ class Product with ChangeNotifier {
     this.isFavorite = false,
   });
 
-  Future<void> toggleFavoriteStatus() async {
+  Future<void> toggleFavoriteStatus(String token, String userId) async {
     final newIsFavoriteValue = !isFavorite;
 
     try {
-      final response = await http.patch(
-        UrlHelper.getProductUrl(id: id),
-        body: json.encode({
-          'isFavorite': newIsFavoriteValue,
-        }),
+      final response = await http.put(
+        UrlHelper.getUserFavoritesProductUrl(id: id, token: token, userId: userId),
+        body: json.encode(isFavorite),
       );
 
       if (response.statusCode >= 400) {
