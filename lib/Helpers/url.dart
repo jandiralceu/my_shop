@@ -9,12 +9,12 @@ class UrlHelper {
             '.firebaseio.com/products/$id.json?auth=$token');
   }
 
-  static Uri getOrderUrl({String? id}) {
+  static Uri getOrderUrl({String? id, String? token}) {
     return Uri.parse(id == null
         ? 'https://jandir-my-shop-default-rtdb.firebaseio'
-            '.com/orders.json'
+            '.com/orders.json?auth=$token'
         : 'https://jandir-my-shop-default-rtdb'
-            '.firebaseio.com/orders/$id.json');
+            '.firebaseio.com/orders/$id.json?auth=$token');
   }
 
   static Uri signupUrl() {
