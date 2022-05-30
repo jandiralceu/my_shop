@@ -2,13 +2,17 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:my_shop/Helpers/url.dart';
 
+import '../Helpers/url.dart';
 import '../Domain/Models/product.dart';
 import '../Domain/Models/http_exception.dart';
 
 class Products with ChangeNotifier {
+  final String? _authToken;
   List<Product> _items = [];
+
+  Products(this._authToken, this._items);
+
 
   List<Product> get items {
     return [..._items];
@@ -83,7 +87,7 @@ class Products with ChangeNotifier {
 
   Future<void> getAllProducts() async {
     try {
-      final result = await http.get(UrlHelper.getProductUrl());
+      final result = await http.get(UrlHelper.getProductUrl(token: _authToken));
       final extractedProducts = json.decode(result.body);
 
       if (extractedProducts == null) {
