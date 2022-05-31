@@ -76,11 +76,6 @@ class Auth with ChangeNotifier {
       notifyListeners();
 
       final preferences = await SharedPreferences.getInstance();
-      // final userData = json.encode({
-      //   'token': _token,
-      //   'userId': _userId,
-      //   'expiryDate': _expireDate!.toIso8601String(),
-      // });
 
       preferences.setString(
           'userData',
