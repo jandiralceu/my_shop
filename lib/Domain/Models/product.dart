@@ -28,7 +28,7 @@ class Product with ChangeNotifier {
     try {
       final response = await http.put(
         UrlHelper.getUserFavoritesProductUrl(id: id, token: token, userId: userId),
-        body: json.encode(isFavorite),
+        body: json.encode(newIsFavoriteValue),
       );
 
       if (response.statusCode >= 400) {

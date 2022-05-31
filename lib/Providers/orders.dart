@@ -8,10 +8,11 @@ import '../Domain/Models/order_item.dart';
 import '../Domain/Models/cart_item.dart';
 
 class Orders with ChangeNotifier {
-  Orders(this._authToken, this._orders);
-
   final String? _authToken;
+  final String? _userId;
   List<OrderItem> _orders = [];
+
+  Orders(this._authToken, this._userId, this._orders);
 
   List<OrderItem> get orders {
     return [..._orders];
@@ -22,7 +23,7 @@ class Orders with ChangeNotifier {
       final timestamp = DateTime.now();
 
       final result = await http.post(
-        UrlHelper.getOrderUrl(token: _authToken),
+        UrlHelper.getOrderUrl(token: _authToken, userId: _userId),
         body: json.encode({
           'amount': total,
           'dateTime': timestamp.toIso8601String(),
@@ -55,7 +56,9 @@ class Orders with ChangeNotifier {
 
   Future<void> getOrders() async {
     try {
-      final response = await http.get(UrlHelper.getOrderUrl(token: _authToken));
+      final response = await http.get(
+        UrlHelper.getOrderUrl(token: _authToken, userId: _userId),
+      );
       final extractedOrders = json.decode(response.body);
 
       if (extractedOrders == null) {

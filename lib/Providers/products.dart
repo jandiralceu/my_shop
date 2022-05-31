@@ -9,10 +9,10 @@ import '../Domain/Models/http_exception.dart';
 
 class Products with ChangeNotifier {
   final String? _authToken;
+  final String? _userId;
   List<Product> _items = [];
 
-  Products(this._authToken, this._items);
-
+  Products(this._authToken, this._userId, this._items);
 
   List<Product> get items {
     return [..._items];
@@ -25,14 +25,14 @@ class Products with ChangeNotifier {
   Future<void> addProduct(Product product) async {
     try {
       await http.post(
-        UrlHelper.getProductUrl(),
+        UrlHelper.getProductUrl(token: _authToken),
         body: json.encode(
           {
             'title': product.title,
             'description': product.description,
             'price': product.price,
             'imageUrl': product.imageUrl,
-            'isFavorite': product.isFavorite
+            'userId': _userId,
           },
         ),
       );
@@ -51,12 +51,13 @@ class Products with ChangeNotifier {
 
   Future<void> updateProduct(String id, Product newProduct) async {
     try {
-      await http.patch(UrlHelper.getProductUrl(id: id), body: json.encode({
-        'title': newProduct.title,
-        'description': newProduct.description,
-        'price': newProduct.price,
-        'imageUrl': newProduct.imageUrl,
-      }));
+      await http.patch(UrlHelper.getProductUrl(id: id),
+          body: json.encode({
+            'title': newProduct.title,
+            'description': newProduct.description,
+            'price': newProduct.price,
+            'imageUrl': newProduct.imageUrl,
+          }));
 
       final index = _items.indexWhere((product) => product.id == id);
 
@@ -65,7 +66,7 @@ class Products with ChangeNotifier {
       }
 
       notifyListeners();
-    } catch(error) {
+    } catch (error) {
       rethrow;
     }
   }
@@ -80,19 +81,23 @@ class Products with ChangeNotifier {
         _items.removeWhere((product) => product.id == id);
         notifyListeners();
       }
-    } catch(error) {
+    } catch (error) {
       rethrow;
     }
   }
 
-  Future<void> getAllProducts() async {
+  Future<void> getAllProducts({bool filterByUser = false}) async {
     try {
-      final result = await http.get(UrlHelper.getProductUrl(token: _authToken));
+      final result = await http.get(UrlHelper.getProductUrl(token: _authToken, filterByUser: filterByUser));
       final extractedProducts = json.decode(result.body);
 
       if (extractedProducts == null) {
         _items = [];
       } else {
+        final favoritesResult = await http
+            .get(UrlHelper.getUserFavoritesProductUrl(token: _authToken, userId: _userId));
+        final extractedFavorites = json.decode(favoritesResult.body);
+
         final List<Product> products = [];
 
         extractedProducts.forEach((id, product) {
@@ -102,7 +107,7 @@ class Products with ChangeNotifier {
               price: product['price'],
               title: product['title'],
               imageUrl: product['imageUrl'],
-              isFavorite: product['isFavorite'],
+              isFavorite: extractedFavorites == null ? false : extractedFavorites[id] ?? false,
               description: product['description'],
             ),
           );
@@ -110,7 +115,6 @@ class Products with ChangeNotifier {
 
         _items = products;
       }
-
 
       notifyListeners();
     } catch (error) {
