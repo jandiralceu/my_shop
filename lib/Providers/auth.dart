@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Helpers/url.dart';
 import '../Domain/Models/http_exception.dart';
@@ -10,6 +13,7 @@ class Auth with ChangeNotifier {
   String? _token;
   DateTime? _expireDate;
   String? _userId;
+  Timer? _authTimer;
 
   bool get isAuth {
     return token != null;
@@ -68,17 +72,73 @@ class Auth with ChangeNotifier {
       _expireDate = DateTime.now()
           .add(Duration(seconds: int.parse(responseData['expiresIn'])));
 
+      autoSignout();
       notifyListeners();
+
+      final preferences = await SharedPreferences.getInstance();
+      // final userData = json.encode({
+      //   'token': _token,
+      //   'userId': _userId,
+      //   'expiryDate': _expireDate!.toIso8601String(),
+      // });
+
+      preferences.setString(
+          'userData',
+          json.encode({
+            'token': _token,
+            'userId': _userId,
+            'expiryDate': _expireDate!.toIso8601String(),
+          }));
     } catch (error) {
       rethrow;
     }
   }
 
-  void signout () {
+  Future<void> signout() async {
     _token = null;
     _userId = null;
     _expireDate = null;
 
+    if (_authTimer != null) {
+      _authTimer!.cancel();
+      _authTimer = null;
+    }
+
     notifyListeners();
+
+    final preferences = await SharedPreferences.getInstance();
+    preferences.clear();
+  }
+
+  void autoSignout() {
+    if (_authTimer != null) {
+      _authTimer!.cancel();
+    }
+    final timeToExpiry = _expireDate!.difference(DateTime.now()).inSeconds;
+    _authTimer = Timer(Duration(seconds: timeToExpiry), signout);
+  }
+
+  Future<bool> tryAutoSignIn() async {
+    final preferences = await SharedPreferences.getInstance();
+
+    if (!preferences.containsKey('userData')) return false;
+
+    final extractedUserData = json.decode(
+      preferences.getString('userData') as String,
+    ) as Map<String, Object>;
+    final expiryDate = DateTime.parse(extractedUserData['expiryDate'] as String);
+
+    if (_expireDate!.isBefore(DateTime.now())) {
+      return false;
+    }
+
+    _token = extractedUserData['token'] as String;
+    _userId = extractedUserData['userId'] as String;
+    _expireDate = expiryDate;
+
+    notifyListeners();
+    autoSignout();
+
+    return true;
   }
 }
